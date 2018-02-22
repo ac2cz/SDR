@@ -11,7 +11,7 @@ import tutorial2.signal.Tools;
 public class WavFile {
 
 	AudioInputStream audioStream = null; // The stream of data from the wave file
-	public static final int DEFAULT_READ_BUFFER_SIZE = 1500 * 4; 
+	public static final int DEFAULT_READ_BUFFER_SIZE = 256 * 4; 
 	byte[] readBuffer = new byte[DEFAULT_READ_BUFFER_SIZE];
 	double[] out = new double[readBuffer.length / 4];
 
