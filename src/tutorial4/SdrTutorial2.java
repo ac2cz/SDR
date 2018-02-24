@@ -1,4 +1,4 @@
-package tutorial2;
+package tutorial4;
 
 import java.io.IOException;
 import javax.sound.sampled.LineUnavailableException;
@@ -8,17 +8,20 @@ import org.jtransforms.fft.DoubleFFT_1D;
 import tutorial2.audio.SoundCard;
 import tutorial2.audio.WavFile;
 import tutorial2.signal.Tools;
+import tutorial4.audio.AudioSink;
+import tutorial2.MainWindow;
 
 public class SdrTutorial2 {
 
 	public static void main(String[] args) throws UnsupportedAudioFileException, 
 	IOException, LineUnavailableException {
-		int sampleRate = 8000;
-		int FFT_LENGTH = 256;
+		int sampleRate = 192000;
+		int FFT_LENGTH = 4096;
 		//WavFile soundCard = new WavFile("cw_signals.wav");
 		SoundCard soundCard = new SoundCard(sampleRate, FFT_LENGTH);
 		MainWindow window = new MainWindow("Test Tool");
-
+		AudioSink sink = new AudioSink(sampleRate, true);
+		
 		double[] psdBuffer = new double[FFT_LENGTH/2];
 
 		double binBandwidth = sampleRate/FFT_LENGTH;
@@ -27,6 +30,7 @@ public class SdrTutorial2 {
 
 		while (readingData) {
 			double[] buffer = soundCard.read();
+			sink.write(buffer);
 			if (buffer != null) {
 
 				DoubleFFT_1D fft;

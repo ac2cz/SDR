@@ -3,7 +3,7 @@ package tutorial2;
 import java.io.IOException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import tutorial2.source.WavFile;
+import tutorial2.audio.WavFile;
 
 public class WavTutorial2 {
 

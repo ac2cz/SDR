@@ -1,4 +1,4 @@
-package tutorial2.source;
+package tutorial2.audio;
 
 import java.io.File;
 import java.io.IOException;

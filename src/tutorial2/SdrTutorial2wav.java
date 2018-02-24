@@ -2,9 +2,10 @@ package tutorial2;
 
 import java.io.IOException;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import tutorial2.source.WavFile;
 
-public class SdrWin {
+import tutorial2.audio.WavFile;
+
+public class SdrTutorial2wav {
 
 	public static void main(String[] args) throws UnsupportedAudioFileException, IOException {
 

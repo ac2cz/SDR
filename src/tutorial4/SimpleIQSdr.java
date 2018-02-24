@@ -1,8 +1,10 @@
-package tutorial3;
+package tutorial4;
 
 import java.io.IOException;
+
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
+
 import tutorial3.audio.SoundCard;
 
 public class SimpleIQSdr {
@@ -13,7 +15,7 @@ public class SimpleIQSdr {
 		int FFT_LENGTH = 4096;
 		//WavFile soundCard = new WavFile("cw_signals.wav");
 		SoundCard soundCard = new SoundCard(sampleRate, FFT_LENGTH, true);
-		MainWindow window = new MainWindow("SimpleIQ SDR", sampleRate, FFT_LENGTH);
+		MainWindow window = new MainWindow("SimpleIQ SDR", sampleRate);
 
 		boolean readingData = true;
 		while (readingData) {
