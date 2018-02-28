@@ -1,9 +1,7 @@
 package tutorial3;
 
 import javax.swing.JFrame;
-
 import tutorial3.plot.FFTPanel;
-import tutorial3.plot.LineChart;
 
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame {

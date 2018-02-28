@@ -9,7 +9,6 @@ public class LineChart extends JPanel {
 
 	double[] data;
 	public static final int BORDER = 30;
-	private final int LABEL_WIDTH = 30;
 
 	public LineChart(String chartTitle) {
 
@@ -33,7 +32,6 @@ public class LineChart extends JPanel {
 			if (data[n] > maxValue) maxValue = data[n];
 			if (data[n] < minValue) minValue = data[n];
 		}
-
 		gr.drawLine(BORDER, getHeight()-BORDER, BORDER, BORDER);
 
 		// The zero point is the middle of the JPanel.  We have aqn equal BORDER top and bottom.
@@ -50,8 +48,6 @@ public class LineChart extends JPanel {
 			int y = getRatioPosition(minValue, maxValue, data[n], getHeight()-BORDER*2);
 			int x = getRatioPosition(data.length,0,n,getWidth()-BORDER*2);
 			x = x + BORDER;
-			//Ellipse2D.Double circle = new Ellipse2D.Double(x+BORDER-2, y+BORDER-2, 4, 4);
-			//g2.fill(circle);
 			gr.drawLine(lastx, lasty, x, y);
 			lastx = x;
 			lasty = y;

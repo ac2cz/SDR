@@ -21,6 +21,15 @@ public class Tools {
 		return value;
 	}
 	
+	public static void getDoublesFromBytes(double[]out, byte[] readBuffer) {
+		for (int i = 0; i < out.length; i++) {// 4 bytes for each sample. 2 in each stereo channel.
+			byte[] ab = {readBuffer[4*i],readBuffer[4*i+1]};
+			double value =  littleEndian2(ab,16);
+			value = value /32768.0;
+			out[i] = value;
+		}	
+	}
+	
 	public static double average (double avg, double new_sample, int N) {
 		avg -= avg / N;
 		avg += new_sample / N;
@@ -29,16 +38,5 @@ public class Tools {
 
 	public static double psd(double re, double im, double binBandwidth) {
 		return (20*Math.log10(Math.sqrt((re*re) + (im*im))/binBandwidth));
-	}
-	
-	public static double[] initBlackmanWindow(int len) {
-		double[] blackmanWindow = new double[len+1];
-		for (int i=0; i <= len; i ++) {
-			blackmanWindow[i] =  (0.42 - 0.5 * Math.cos(2 * Math.PI * i / len) 
-					+ 0.08 * Math.cos((4 * Math.PI * i) / len));
-			if (blackmanWindow[i] < 0)
-				blackmanWindow[i] = 0;
-		}
-		return blackmanWindow;
-	}
+	}	
 }

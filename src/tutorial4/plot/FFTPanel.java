@@ -22,8 +22,9 @@ public class FFTPanel extends JPanel implements MouseListener {
 	int averageNum = 5;
 	int selectedBin;
 	boolean firstRun = true;
+	boolean complex = true;
 	
-	public FFTPanel(int rate, long freq, int length) {
+	public FFTPanel(int rate, long freq, int length, boolean complex) {
 		sampleRate = rate;
 		centerFrequency = freq;
 		fftLength = length;
@@ -56,7 +57,10 @@ public class FFTPanel extends JPanel implements MouseListener {
 	}
 	
 	public void setData(double[] buffer) {
-		fft.complexForward(buffer);
+		if (complex)
+			fft.complexForward(buffer);
+		else
+			fft.realForward(buffer);
 		for (int k=0; k<buffer.length/2; k++) {
 			double psd = Tools.psd(buffer[2*k],buffer[2*k+1], fftLength);
 			if (firstRun)
@@ -100,22 +104,24 @@ public class FFTPanel extends JPanel implements MouseListener {
 
 		// Draw the FFT result, one half at a time
 		// First the negative frequencies, which we will draw on the left
-		for (int n=fftLength/2; n< (fftLength); n+=step) {
-			int y = LineChart.getRatioPosition(minValue, maxValue, data[n], graphHeight);
-			int x = LineChart.getRatioPosition(fftLength/2, 0, n-fftLength/2, graphWidth/2);
-			x = x + BORDER;
-			gr.drawLine(lastx, lasty, x, y);
-			lastx = x;
-			lasty = y;
-		}
-		// Then the positive frequencies, which we draw on the right
-		for (int i=0; i< (fftLength/2); i+=step) {
-			int y = LineChart.getRatioPosition(minValue, maxValue, data[i], graphHeight);
-			int x = LineChart.getRatioPosition(fftLength/2, 0, i, graphWidth/2);
-			x = x + BORDER + graphWidth/2;
-			gr.drawLine(lastx, lasty, x, y);
-			lastx = x;
-			lasty = y;
+		if (data != null) {
+			for (int n=fftLength/2; n< (fftLength); n+=step) {
+				int y = LineChart.getRatioPosition(minValue, maxValue, data[n], graphHeight);
+				int x = LineChart.getRatioPosition(fftLength/2, 0, n-fftLength/2, graphWidth/2);
+				x = x + BORDER;
+				gr.drawLine(lastx, lasty, x, y);
+				lastx = x;
+				lasty = y;
+			}
+			// Then the positive frequencies, which we draw on the right
+			for (int i=0; i< (fftLength/2); i+=step) {
+				int y = LineChart.getRatioPosition(minValue, maxValue, data[i], graphHeight);
+				int x = LineChart.getRatioPosition(fftLength/2, 0, i, graphWidth/2);
+				x = x + BORDER + graphWidth/2;
+				gr.drawLine(lastx, lasty, x, y);
+				lastx = x;
+				lasty = y;
+			}
 		}
 	}
 

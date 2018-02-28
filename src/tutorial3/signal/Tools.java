@@ -1,5 +1,6 @@
 package tutorial3.signal;
 
+
 public class Tools {
 	public static int littleEndian2(byte b[], int bitsPerSample) {
 		byte b1 = b[0];
@@ -19,6 +20,16 @@ public class Tools {
 		if (value > (2^(bitsPerSample-1)-1)) 
 			value = -(2^bitsPerSample) + value;
 		return value;
+	}
+	
+	public static void getDoublesFromBytes(double[]out, byte[] readBuffer, boolean stereo) {
+		for (int i = 0; i < out.length; i++) {
+			int step = 4;
+			if (stereo) step = 2;
+			byte[] ab = {readBuffer[step*i],readBuffer[step*i+1]};
+			double value =  littleEndian2(ab,16)/32768.0;
+			out[i] = value;
+		}
 	}
 	
 	public static double average (double avg, double new_sample, int N) {

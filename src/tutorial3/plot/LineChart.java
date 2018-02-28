@@ -9,7 +9,6 @@ public class LineChart extends JPanel {
 
 	double[] data;
 	public static final int BORDER = 30;
-	private final int LABEL_WIDTH = 30;
 
 	public LineChart(String chartTitle) {
 
@@ -33,10 +32,9 @@ public class LineChart extends JPanel {
 			if (data[n] > maxValue) maxValue = data[n];
 			if (data[n] < minValue) minValue = data[n];
 		}
-
 		gr.drawLine(BORDER, getHeight()-BORDER, BORDER, BORDER);
 
-		// The zero point is the middle of the JPanel.  We have aqn equal BORDER top and bottom.
+		// The zero point is the middle of the JPanel.  We have an equal BORDER top and bottom.
 		int zeroPoint = getHeight()/2;
 		gr.drawLine(BORDER, zeroPoint, getWidth()-BORDER, zeroPoint);
 
@@ -50,7 +48,6 @@ public class LineChart extends JPanel {
 			int y = getRatioPosition(minValue, maxValue, data[n], getHeight()-BORDER*2);
 			int x = getRatioPosition(data.length,0,n,getWidth()-BORDER*2);
 			x = x + BORDER;
-
 			gr.drawLine(lastx, lasty, x, y);
 			lastx = x;
 			lasty = y;

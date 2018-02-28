@@ -4,16 +4,17 @@ import java.io.IOException;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import tutorial3.audio.SoundCard;
+import tutorial3.audio.WavFile;
 
 public class SimpleIQSdr {
 
 	public static void main(String[] args) throws UnsupportedAudioFileException, 
 	IOException, LineUnavailableException {
 		int sampleRate = 192000;
-		int FFT_LENGTH = 4096;
-		//WavFile soundCard = new WavFile("cw_signals.wav");
-		SoundCard soundCard = new SoundCard(sampleRate, FFT_LENGTH, true);
-		MainWindow window = new MainWindow("SimpleIQ SDR", sampleRate, FFT_LENGTH);
+		int len = 4096;
+		WavFile soundCard = new WavFile("ecars_net_7255_HDSDR_20180225_174354Z_7255kHz_RF.wav", len, true);
+		//SoundCard soundCard = new SoundCard(sampleRate, len, true);
+		MainWindow window = new MainWindow("SimpleIQ SDR", sampleRate, len);
 
 		boolean readingData = true;
 		while (readingData) {

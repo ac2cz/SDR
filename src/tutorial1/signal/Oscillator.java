@@ -9,16 +9,13 @@ public class Oscillator {
 	private double phase = 0;
 	private double phaseIncrement = 0;
 	
-	public Oscillator(int samplesPerSecond) {
-		this.samplesPerSecond = samplesPerSecond;
+	public Oscillator(int samples, int freq) {
+		this.samplesPerSecond = samples;
+		this.frequency = freq;
+		phaseIncrement = 2 * Math.PI * frequency / samplesPerSecond;
 		for (int n=0; n<TABLE_SIZE; n++) {
 			sinTable[n] = Math.sin(n*2.0*Math.PI/TABLE_SIZE);
 		}
-	}
-	
-	public void setFrequency(int frequency) {
-		this.frequency = frequency;
-		phaseIncrement = 2 * Math.PI * frequency / samplesPerSecond;
 	}
 	
 	public double nextSample() {
@@ -29,5 +26,4 @@ public class Oscillator {
 		double value = sinTable[idx];
 		return value;
 	}
-	
 }

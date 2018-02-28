@@ -11,15 +11,14 @@ public class SoundCard {
 
 	AudioFormat audioFormat;
 	TargetDataLine targetDataLine;
-	int DEFAULT_READ_BUFFER_SIZE; 
-	byte[] data;
+	byte[] readBuffer;
 	double[] out;
 
 	public SoundCard(int sampleRate, int samples) throws LineUnavailableException {	
-		DEFAULT_READ_BUFFER_SIZE = samples * 4; 
-		out = new double[DEFAULT_READ_BUFFER_SIZE / 4];
-		data = new byte[DEFAULT_READ_BUFFER_SIZE];
+		readBuffer = new byte[samples * 4];
+		out = new double[readBuffer.length / 4];
 		audioFormat = getAudioFormat(sampleRate);
+		System.out.println("Source Format: " + audioFormat);
 		DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
 		targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
 		targetDataLine.open(audioFormat);
@@ -27,12 +26,8 @@ public class SoundCard {
 	}
 
 	public double[] read() {
-		targetDataLine.read(data, 0, data.length);
-		for (int i = 0; i < out.length; i++) {
-			byte[] ab = {data[4*i],data[4*i+1]};
-			int value =  Tools.littleEndian2(ab,16)/2^15;
-			out[i] = value;
-		}
+		targetDataLine.read(readBuffer, 0, readBuffer.length);
+		Tools.getDoublesFromBytes(out, readBuffer);
 		return out;
 	}
 
@@ -47,7 +42,6 @@ public class SoundCard {
 		boolean signed = true;
 		boolean bigEndian = false;
 		AudioFormat af = new AudioFormat(sampleRate,sampleSizeInBits,channels,signed,bigEndian); 
-		System.out.println("SC Format " + af);
 		return af;
 	}
 }

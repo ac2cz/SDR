@@ -4,11 +4,11 @@ import java.io.IOException;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import org.jtransforms.fft.DoubleFFT_1D;
-
-import tutorial2.audio.SoundCard;
-import tutorial2.audio.WavFile;
-import tutorial2.signal.Tools;
+import tutorial4.audio.SoundCard;
+import tutorial4.audio.WavFile;
+import tutorial4.signal.Tools;
 import tutorial4.audio.AudioSink;
+import tutorial4.signal.FirFilter;
 import tutorial2.MainWindow;
 
 public class SdrTutorial2 {
@@ -16,23 +16,26 @@ public class SdrTutorial2 {
 	public static void main(String[] args) throws UnsupportedAudioFileException, 
 	IOException, LineUnavailableException {
 		int sampleRate = 192000;
-		int FFT_LENGTH = 4096;
-		//WavFile soundCard = new WavFile("cw_signals.wav");
-		SoundCard soundCard = new SoundCard(sampleRate, FFT_LENGTH);
+		int len = 4096;
+		//WavFile soundCard = new WavFile("ecars_net_7255_HDSDR_20180225_174354Z_7255kHz_RF.wav", len, false);
+		SoundCard soundCard = new SoundCard(sampleRate, len, false);
 		MainWindow window = new MainWindow("Test Tool");
-		AudioSink sink = new AudioSink(sampleRate, true);
-		
-		double[] psdBuffer = new double[FFT_LENGTH/2];
+		AudioSink sink = new AudioSink(sampleRate);
+		FirFilter lowPass = new FirFilter();
 
-		double binBandwidth = sampleRate/FFT_LENGTH;
+		double[] psdBuffer = new double[len/2];		
+		double binBandwidth = sampleRate/len;
 		boolean readingData = true;
 		int averageNum = 10;
 
 		while (readingData) {
 			double[] buffer = soundCard.read();
-			sink.write(buffer);
+			
 			if (buffer != null) {
-
+				for (int d=0; d < buffer.length; d++) {
+					buffer[d] = lowPass.filter(buffer[d]);
+				}
+				sink.write(buffer);
 				DoubleFFT_1D fft;
 				fft = new DoubleFFT_1D(buffer.length);
 

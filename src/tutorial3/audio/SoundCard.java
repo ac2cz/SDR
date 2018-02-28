@@ -10,19 +10,19 @@ import tutorial3.signal.Tools;
 public class SoundCard {
 
 	AudioFormat audioFormat;
-	TargetDataLine targetDataLine;
-	int DEFAULT_READ_BUFFER_SIZE; 
-	byte[] data;
+	TargetDataLine targetDataLine; 
+	byte[] readBuffer;
 	double[] out;
 	boolean stereo = false;
 	
-	public SoundCard(int sampleRate, int samples, boolean stereo) throws LineUnavailableException {	
+	public SoundCard(int sampleRate, int samples, boolean stereo) throws LineUnavailableException {
+		readBuffer = new byte[samples * 4];
 		if (stereo)
-			DEFAULT_READ_BUFFER_SIZE = 2 * samples * 4; 
+			out = new double[samples * 2]; 
 		else 
-			DEFAULT_READ_BUFFER_SIZE = samples * 4;
-		out = new double[DEFAULT_READ_BUFFER_SIZE / 4];
-		data = new byte[DEFAULT_READ_BUFFER_SIZE];
+			out = new double[samples];
+		
+		
 		audioFormat = getAudioFormat(sampleRate);
 		DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
 		targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
@@ -32,14 +32,8 @@ public class SoundCard {
 	}
 
 	public double[] read() {
-		targetDataLine.read(data, 0, data.length);
-		for (int i = 0; i < out.length; i++) {
-			int step = 4;
-			if (stereo) step = 2;
-			byte[] ab = {data[step*i],data[step*i+1]};
-			double value =  Tools.littleEndian2(ab,16)/32768.0;
-			out[i] = value;
-		}
+		targetDataLine.read(readBuffer, 0, readBuffer.length);
+		Tools.getDoublesFromBytes(out, readBuffer, stereo);
 		return out;
 	}
 

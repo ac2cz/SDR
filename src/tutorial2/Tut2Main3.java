@@ -9,19 +9,18 @@ import tutorial2.audio.SoundCard;
 import tutorial2.audio.WavFile;
 import tutorial2.signal.Tools;
 
-public class SdrTutorial2 {
+public class Tut2Main3 {
 
 	public static void main(String[] args) throws UnsupportedAudioFileException, 
 	IOException, LineUnavailableException {
 		int sampleRate = 8000;
-		int FFT_LENGTH = 256;
-		//WavFile soundCard = new WavFile("cw_signals.wav");
-		SoundCard soundCard = new SoundCard(sampleRate, FFT_LENGTH);
+		int len = 256;
+		//WavFile soundCard = new WavFile("ecars_net_7255_HDSDR_20180225_174354Z_7255kHz_RF.wav", len);
+		SoundCard soundCard = new SoundCard(sampleRate, len);
 		MainWindow window = new MainWindow("Test Tool");
 
-		double[] psdBuffer = new double[FFT_LENGTH/2];
-
-		double binBandwidth = sampleRate/FFT_LENGTH;
+		double[] psdBuffer = new double[len/2];
+		double binBandwidth = sampleRate/len;
 		boolean readingData = true;
 		int averageNum = 10;
 
@@ -30,19 +29,19 @@ public class SdrTutorial2 {
 			if (buffer != null) {
 
 				DoubleFFT_1D fft;
-				fft = new DoubleFFT_1D(buffer.length);
+				fft = new DoubleFFT_1D(len);
 
 				fft.realForward(buffer);
-				psdBuffer[0] = Tools.average(psdBuffer[0],
-						Tools.psd(buffer[0], buffer[0], binBandwidth), 
-						averageNum); // bin 0
-				for (int k=1; k<buffer.length/2; k++)
-					psdBuffer[k] = Tools.average(psdBuffer[k], 
-							Tools.psd(buffer[2*k],buffer[2*k+1], binBandwidth), 
-							averageNum);
-				psdBuffer[buffer.length/2-1] = Tools.average(psdBuffer[buffer.length/2-1], 
-						Tools.psd(buffer[1],buffer[buffer.length/2],binBandwidth), 
-						averageNum); // bin n/2
+				double psd = Tools.psd(buffer[0],buffer[0], binBandwidth);
+				psdBuffer[0] = Tools.average(psdBuffer[0],psd, averageNum); // bin 0
+				for (int k=1; k<len/2; k++) {
+					psd = Tools.psd(buffer[2*k],buffer[2*k+1], binBandwidth);
+					psdBuffer[k] = Tools.average(psdBuffer[k],psd, averageNum); // bin k
+				}
+				// finally deal with bin n/2
+				psd = Tools.psd(buffer[1],buffer[len/2],binBandwidth);
+				psdBuffer[len/2-1] = Tools.average(psdBuffer[len/2-1],psd, averageNum); 
+				
 				window.setData(psdBuffer);
 				window.setVisible(true); // causes window to be redrawn
 			} else 
