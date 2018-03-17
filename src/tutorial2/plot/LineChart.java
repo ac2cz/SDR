@@ -46,6 +46,7 @@ public class LineChart extends JPanel {
 			// JPanel and -1 is the bottom.  The top is at x position BORDER.  The bottom is at 
 			// X position getHeight()-BORDER
 			int y = getRatioPosition(minValue, maxValue, data[n], getHeight()-BORDER*2);
+			y = y + BORDER;
 			int x = getRatioPosition(data.length,0,n,getWidth()-BORDER*2);
 			x = x + BORDER;
 			gr.drawLine(lastx, lasty, x, y);

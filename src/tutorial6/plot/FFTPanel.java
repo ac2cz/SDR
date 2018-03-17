@@ -1,13 +1,18 @@
-package tutorial4.plot;
+package tutorial6.plot;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import javax.swing.JPanel;
 import org.jtransforms.fft.DoubleFFT_1D;
-import tutorial4.signal.Tools;
+
+import tutorial6.signal.ComplexOscillator;
+import tutorial6.signal.Tools;
+import tutorial6.signal.Window;
 
 @SuppressWarnings("serial")
-public class FFTPanel extends JPanel {
+public class FFTPanel extends JPanel implements MouseListener {
 
 	double[] data;
 	long centerFrequency = 0; // in kHz
@@ -17,18 +22,31 @@ public class FFTPanel extends JPanel {
 	DoubleFFT_1D fft;
 	double[] psdBuffer;
 	double binBandwidth;
-	int averageNum = 5;
+	int averageNum = 10;
 	int selectedBin;
 	boolean firstRun = true;
 	boolean complex = true;
+	double[] blackmanWindow;
+	boolean windowData = false;
+	ComplexOscillator nco = null;
 	
-	public FFTPanel(int rate, long freq, int length, boolean complex) {
+	public boolean realOnly = false;
+	public boolean imagOnly = false;
+	
+	String name;
+	
+	public FFTPanel(String name, int rate, long freq, int length, boolean complex) {
 		sampleRate = rate;
 		centerFrequency = freq;
 		fftLength = length;
-		binBandwidth = sampleRate/fftLength;
-		psdBuffer = new double[fftLength+1];
-		fft = new DoubleFFT_1D(fftLength);
+		this.name = name;
+		setFFTLength(length);
+		addMouseListener(this);
+		this.complex = complex;
+	}
+
+	public void setNco(ComplexOscillator localOsc) {
+		this.nco = localOsc;
 	}
 	
 	public void setCenterFrequency(long freq) {
@@ -50,16 +68,31 @@ public class FFTPanel extends JPanel {
 	
 	public void setFFTLength(int len) {
 		this.fftLength = len;
+		psdBuffer = new double[fftLength+1];
+		fft = new DoubleFFT_1D(fftLength);
+		blackmanWindow = Window.initBlackmanWindow(fftLength-1);
 		binBandwidth = sampleRate/fftLength;
 	}
 	
 	public void setData(double[] buffer) {
-		if (complex)
+		if (complex) {
+			if (windowData)
+			for (int i=0; i< buffer.length/2; i++) {
+				buffer[2*i] = buffer[2*i] * blackmanWindow[i];
+				buffer[2*i+1] = buffer[2*i+1] * blackmanWindow[i];
+			}
 			fft.complexForward(buffer);
-		else
+		} else
 			fft.realForward(buffer);
 		for (int k=0; k<buffer.length/2; k++) {
-			double psd = Tools.psd(buffer[2*k],buffer[2*k+1], binBandwidth);
+			double psd = 0;
+			if (realOnly)
+				psd = buffer[2*k];
+			else if (imagOnly)
+				psd = buffer[2*k+1];
+			else
+				psd = Tools.psd(buffer[2*k],buffer[2*k+1], binBandwidth);
+			//double psd = Math.sqrt(buffer[2*k]*buffer[2*k]+buffer[2*k+1]*buffer[2*k+1]);
 			if (firstRun)
 				psdBuffer[k] = psd; // we do not have an average yet
 			else
@@ -73,13 +106,24 @@ public class FFTPanel extends JPanel {
 	public void paintComponent(Graphics gr) {
 		super.paintComponent( gr ); // call superclass's paintComponent  
 		Graphics2D g2 = (Graphics2D) gr;
-
+		
 		int graphWidth = getWidth()-BORDER*2;
 		int graphHeight = getHeight()-BORDER*2;
-		
+
+		gr.drawString(name, graphWidth/2, BORDER/2); 
+
 		// Our FFT has a fixed vertical scale
-		int maxValue = 10;
-		int minValue = -120;
+		double maxValue = 10;
+		double minValue = -100;
+		if (realOnly) {
+			maxValue = 0.5;
+			minValue = -0.5;
+		}
+		if (imagOnly) {
+			maxValue = 5.0;
+			minValue = -0.5;
+			
+		}
 		
 		// The zero point is where the labels will go and is along the bottom of the JPanel.
 		int zeroPoint = getHeight()-BORDER;
@@ -89,7 +133,7 @@ public class FFTPanel extends JPanel {
 		int selection = getSelectionFromBin(selectedBin);
 
 		int c = LineChart.getRatioPosition(0, fftLength, selection, graphWidth);
-		//gr.drawLine(c+BORDER, BORDER, c+BORDER, zeroPoint);
+		gr.drawLine(c+BORDER, BORDER, c+BORDER, zeroPoint);
 
 		int lastx = BORDER, lasty = zeroPoint;
 
@@ -138,14 +182,14 @@ public class FFTPanel extends JPanel {
 		}
 	}
 
-	private void drawVerticalScale(Graphics gr, int minValue, int maxValue, int graphHeight, int zeroPoint) {
+	private void drawVerticalScale(Graphics gr, double minValue, double maxValue, int graphHeight, int zeroPoint) {
 		gr.drawLine(BORDER, zeroPoint, getWidth()-BORDER, zeroPoint);
 		int labelHeight = 30;
 		// calculate number of labels we need on vertical axis
 		int numberOfLabels = graphHeight/labelHeight;
 		if (numberOfLabels != 0) {
-			int label = minValue;
-			int increment = (minValue - maxValue) / numberOfLabels;
+			int label = (int) minValue;
+			int increment = (int) ((minValue - maxValue) / numberOfLabels);
 			for (int v=0; v < numberOfLabels; v++) {
 				int pos = LineChart.getRatioPosition(minValue, maxValue, label, graphHeight);
 				gr.drawString(""+label, 10, pos); 
@@ -175,5 +219,43 @@ public class FFTPanel extends JPanel {
 			selection = bin - fftLength/2;
 
 		return selection;
+	}
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		int x=e.getX();
+	    x = x - BORDER;
+		int selection = LineChart.getRatioPosition(0, getWidth()-BORDER*2, x, fftLength );
+		if (selection >= fftLength/2) 
+			selectedBin = selection - fftLength/2;
+		else
+			selectedBin = selection + fftLength/2;
+		System.out.println(x+" is fft bin "+selectedBin);//these co-ords are relative to the component
+		System.out.println("Tuned to: " + getSelectedFrequency());
+		if (nco != null)
+			nco.setFrequency(-1*getSelectedFrequency()); // flip the sign as we move the spectrum in the opposite direction
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 }

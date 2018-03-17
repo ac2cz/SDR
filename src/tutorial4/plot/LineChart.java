@@ -36,7 +36,7 @@ public class LineChart extends JPanel {
 		gr.drawLine(BORDER, getHeight()-BORDER, BORDER, BORDER);
 
 		// The zero point is the middle of the JPanel.  We have an equal BORDER top and bottom.
-		int zeroPoint = getHeight()/2;
+		int zeroPoint = (getHeight()-BORDER*2)/2;
 		gr.drawLine(BORDER, zeroPoint, getWidth()-BORDER, zeroPoint);
 
 		int step = data.length / 16; // plot 16 labels
