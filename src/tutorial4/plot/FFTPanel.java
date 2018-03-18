@@ -18,7 +18,6 @@ public class FFTPanel extends JPanel {
 	double[] psdBuffer;
 	double binBandwidth;
 	int averageNum = 5;
-	int selectedBin;
 	boolean firstRun = true;
 	boolean complex = true;
 	
@@ -31,26 +30,8 @@ public class FFTPanel extends JPanel {
 		fft = new DoubleFFT_1D(fftLength);
 	}
 	
-	public void setCenterFrequency(long freq) {
-		centerFrequency = freq;
-	}
-	
 	public int getCenterFreqkHz() {
 		return (int) (centerFrequency/1000.0);
-	}
-
-	public long getSelectedFrequency() {
-		return binToFrequency(selectedBin);
-	}
-	
-	public void setSampleRate(int rate) {
-		this.sampleRate = rate; 
-		binBandwidth = sampleRate/fftLength;
-	}
-	
-	public void setFFTLength(int len) {
-		this.fftLength = len;
-		binBandwidth = sampleRate/fftLength;
 	}
 	
 	public void setData(double[] buffer) {
@@ -86,11 +67,6 @@ public class FFTPanel extends JPanel {
 		drawVerticalScale(gr, minValue, maxValue, graphHeight, zeroPoint);
 		drawHorizontalScale(gr, graphWidth, zeroPoint);
 		
-		int selection = getSelectionFromBin(selectedBin);
-
-		int c = LineChart.getRatioPosition(0, fftLength, selection, graphWidth);
-		//gr.drawLine(c+BORDER, BORDER, c+BORDER, zeroPoint);
-
 		int lastx = BORDER, lasty = zeroPoint;
 
 		int step = 1;
@@ -152,28 +128,5 @@ public class FFTPanel extends JPanel {
 				label = label - increment;
 			}
 		}
-	}
-
-	private int binToFrequencyInkHz(int bin) {
-		return (int) (binToFrequency(bin)/1000);
-	}
-	
-	private long binToFrequency(int bin) {
-		long freq = 0;
-		if (bin < fftLength/2) {
-			freq = (long)(centerFrequency + bin*binBandwidth);
-		} else {
-			freq = (long)(centerFrequency - (fftLength-bin)*binBandwidth);
-		}
-		return freq;
-	}
-	private int getSelectionFromBin(int bin) {
-		int selection;
-		if (bin < fftLength/2)
-			selection = bin + fftLength/2;
-		else
-			selection = bin - fftLength/2;
-
-		return selection;
 	}
 }

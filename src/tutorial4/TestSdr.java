@@ -9,9 +9,9 @@ import tutorial4.audio.WavFile;
 import tutorial4.signal.Tools;
 import tutorial4.audio.AudioSink;
 import tutorial4.signal.FirFilter;
-import tutorial2.MainWindow;
+import tutorial4.TestWindow;
 
-public class SdrTutorial2 {
+public class TestSdr {
 
 	public static void main(String[] args) throws UnsupportedAudioFileException, 
 	IOException, LineUnavailableException {
@@ -19,7 +19,7 @@ public class SdrTutorial2 {
 		int len = 4096;
 		//WavFile soundCard = new WavFile("ecars_net_7255_HDSDR_20180225_174354Z_7255kHz_RF.wav", len, false);
 		SoundCard soundCard = new SoundCard(sampleRate, len, false);
-		MainWindow window = new MainWindow("Test Tool");
+		TestWindow window = new TestWindow("Test Tool");
 		AudioSink sink = new AudioSink(sampleRate);
 		FirFilter lowPass = new FirFilter();
 

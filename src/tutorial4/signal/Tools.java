@@ -70,14 +70,4 @@ public class Tools {
 		return (20*Math.log10(Math.sqrt((re*re) + (im*im))/binBandwidth));
 	}
 	
-	public static double[] initBlackmanWindow(int len) {
-		double[] blackmanWindow = new double[len+1];
-		for (int i=0; i <= len; i ++) {
-			blackmanWindow[i] =  (0.42 - 0.5 * Math.cos(2 * Math.PI * i / len) 
-					+ 0.08 * Math.cos((4 * Math.PI * i) / len));
-			if (blackmanWindow[i] < 0)
-				blackmanWindow[i] = 0;
-		}
-		return blackmanWindow;
-	}
 }

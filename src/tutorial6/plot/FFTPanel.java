@@ -230,9 +230,9 @@ public class FFTPanel extends JPanel implements MouseListener {
 		else
 			selectedBin = selection + fftLength/2;
 		System.out.println(x+" is fft bin "+selectedBin);//these co-ords are relative to the component
-		System.out.println("Tuned to: " + getSelectedFrequency());
+		System.out.println("Tuned to: " + (-1*getSelectedFrequency()+centerFrequency));
 		if (nco != null)
-			nco.setFrequency(-1*getSelectedFrequency()); // flip the sign as we move the spectrum in the opposite direction
+			nco.setFrequency(-1*getSelectedFrequency()+centerFrequency); // flip the sign as we move the spectrum in the opposite direction
 	}
 
 	@Override

@@ -1,8 +1,7 @@
 package tutorial2;
 import org.jtransforms.fft.DoubleFFT_1D;
 import tutorial2.MainWindow;
-import tutorial5.signal.Oscillator;
-import tutorial5.signal.Window;
+import tutorial1.signal.Oscillator;
 
 public class SdrTutorial1 {
 

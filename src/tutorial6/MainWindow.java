@@ -31,15 +31,15 @@ public class MainWindow extends JFrame {
 		add(audioPanel, BorderLayout.CENTER);
 		audioPanel.setLayout(new BorderLayout());
 		
-		audioFftPanel = new FFTPanel("Audio", sampleRate/4, 0, samples/8, true);
+		audioFftPanel = new FFTPanel("Audio", sampleRate/4, 0, samples/8, false);
 		audioFftPanel.setPreferredSize(new Dimension(600, 200));
 		audioPanel.add(audioFftPanel, BorderLayout.CENTER);
 		
-		rfFftPanel = new FFTPanel("RF", sampleRate, 0, samples, true);
+		rfFftPanel = new FFTPanel("RF", sampleRate, 7200000, samples, true);
 		rfFftPanel.setPreferredSize(new Dimension(1200,300));
 		add(rfFftPanel, BorderLayout.NORTH);
 		
-		rfFftPanel2 = new FFTPanel("IF", sampleRate, 0, samples, true);
+		rfFftPanel2 = new FFTPanel("IF", sampleRate, 7200000, samples, true);
 		rfFftPanel2.setPreferredSize(new Dimension(600, 200));
 		audioPanel.add(rfFftPanel2, BorderLayout.WEST);
 	}
