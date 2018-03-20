@@ -1,16 +1,15 @@
 package tutorial5.plot;
 
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import javax.swing.JPanel;
 import org.jtransforms.fft.DoubleFFT_1D;
-import tutorial4.signal.Tools;
+import tutorial3.signal.Tools;
 
 @SuppressWarnings("serial")
 public class FFTPanel extends JPanel {
 
 	double[] data;
-	long centerFrequency = 0; // in kHz
+	long centerFrequency = 0; // in Hz
 	int sampleRate = 0;
 	int fftLength;
 	public static final int BORDER = 30;
@@ -19,9 +18,8 @@ public class FFTPanel extends JPanel {
 	double binBandwidth;
 	int averageNum = 5;
 	boolean firstRun = true;
-	boolean complex = true;
 	
-	public FFTPanel(int rate, long freq, int length, boolean complex) {
+	public FFTPanel(int rate, long freq, int length) {
 		sampleRate = rate;
 		centerFrequency = freq;
 		fftLength = length;
@@ -35,10 +33,7 @@ public class FFTPanel extends JPanel {
 	}
 	
 	public void setData(double[] buffer) {
-		if (complex)
-			fft.complexForward(buffer);
-		else
-			fft.realForward(buffer);
+		fft.complexForward(buffer);
 		for (int k=0; k<buffer.length/2; k++) {
 			double psd = Tools.psd(buffer[2*k],buffer[2*k+1], binBandwidth);
 			if (firstRun)
@@ -53,7 +48,6 @@ public class FFTPanel extends JPanel {
 
 	public void paintComponent(Graphics gr) {
 		super.paintComponent( gr ); // call superclass's paintComponent  
-		Graphics2D g2 = (Graphics2D) gr;
 
 		int graphWidth = getWidth()-BORDER*2;
 		int graphHeight = getHeight()-BORDER*2;
@@ -69,7 +63,7 @@ public class FFTPanel extends JPanel {
 
 		int lastx = BORDER, lasty = zeroPoint;
 
-		int step = 1;
+		int step = 1;  // use step to minimize the number of pixels we plot. Gives a cleaner display
 		if (graphWidth > fftLength)
 			step = 1;
 		else
@@ -77,35 +71,33 @@ public class FFTPanel extends JPanel {
 
 		// Draw the FFT result, one half at a time
 		// First the negative frequencies, which we will draw on the left
-		if (data != null) {
-			for (int n=fftLength/2; n< (fftLength); n+=step) {
-				int y = LineChart.getRatioPosition(minValue, maxValue, data[n], graphHeight);
-				int x = LineChart.getRatioPosition(fftLength/2, 0, n-fftLength/2, graphWidth/2);
-				x = x + BORDER;
-				gr.drawLine(lastx, lasty, x, y);
-				lastx = x;
-				lasty = y;
-			}
-			// Then the positive frequencies, which we draw on the right
-			for (int i=0; i< (fftLength/2); i+=step) {
-				int y = LineChart.getRatioPosition(minValue, maxValue, data[i], graphHeight);
-				int x = LineChart.getRatioPosition(fftLength/2, 0, i, graphWidth/2);
-				x = x + BORDER + graphWidth/2;
-				gr.drawLine(lastx, lasty, x, y);
-				lastx = x;
-				lasty = y;
-			}
+		for (int n=fftLength/2; n< (fftLength); n+=step) {
+			int y = LineChart.getRatioPosition(minValue, maxValue, data[n], graphHeight);
+			int x = LineChart.getRatioPosition(fftLength/2, 0, n-fftLength/2, graphWidth/2);
+			x = x + BORDER;
+			gr.drawLine(lastx, lasty, x, y);
+			lastx = x;
+			lasty = y;
+		}
+		// Then the positive frequencies, which we draw on the right
+		for (int i=0; i< (fftLength/2); i+=step) {
+			int y = LineChart.getRatioPosition(minValue, maxValue, data[i], graphHeight);
+			int x = LineChart.getRatioPosition(fftLength/2, 0, i, graphWidth/2);
+			x = x + BORDER + graphWidth/2;
+			gr.drawLine(lastx, lasty, x, y);
+			lastx = x;
+			lasty = y;
 		}
 	}
 
 	private void drawHorizontalScale(Graphics gr, int graphWidth, int zeroPoint) {
-		int minFreqValue = (int) (getCenterFreqkHz()-sampleRate/2000);//96;
-		int maxFreqValue = (int) (getCenterFreqkHz()+sampleRate/2000);//96;
+		int minFreqValue = (int) (getCenterFreqkHz()-sampleRate/2000);// half the bandwidth in kHz
+		int maxFreqValue = (int) (getCenterFreqkHz()+sampleRate/2000);// half the bandwidth in kHz
 		int labelWidth = 50; // allow 50 pixels per label
 		int numLabels = (graphWidth) / labelWidth; 
 		int increment = (maxFreqValue - minFreqValue) / numLabels;
-		int label = getCenterFreqkHz()-increment*numLabels/2;
-		gr.drawLine(BORDER, getHeight()-BORDER, BORDER, BORDER);
+		int label = getCenterFreqkHz()-increment*numLabels/2; //freq value for this label
+		gr.drawLine(BORDER, getHeight()-BORDER, BORDER, BORDER); // axis line
 		for (int v=0; v < numLabels; v++) {
 			int pos = LineChart.getRatioPosition(maxFreqValue, minFreqValue, label, graphWidth);
 			gr.drawString(""+label, pos+BORDER, zeroPoint+15); 
@@ -117,14 +109,13 @@ public class FFTPanel extends JPanel {
 	private void drawVerticalScale(Graphics gr, int minValue, int maxValue, int graphHeight, int zeroPoint) {
 		gr.drawLine(BORDER, zeroPoint, getWidth()-BORDER, zeroPoint);
 		int labelHeight = 30;
-		// calculate number of labels we need on vertical axis
 		int numberOfLabels = graphHeight/labelHeight;
 		if (numberOfLabels != 0) {
 			int label = minValue;
 			int increment = (minValue - maxValue) / numberOfLabels;
 			for (int v=0; v < numberOfLabels; v++) {
 				int pos = LineChart.getRatioPosition(minValue, maxValue, label, graphHeight);
-				gr.drawString(""+label, 10, pos); 
+				gr.drawString(""+label, 3, pos); 
 				label = label - increment;
 			}
 		}

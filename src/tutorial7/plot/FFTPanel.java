@@ -1,4 +1,4 @@
-package tutorial6.plot;
+package tutorial7.plot;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -7,15 +7,13 @@ import java.awt.event.MouseListener;
 import javax.swing.JPanel;
 import org.jtransforms.fft.DoubleFFT_1D;
 
-import tutorial6.signal.ComplexOscillator;
-import tutorial6.signal.Tools;
+import tutorial7.signal.ComplexOscillator;
+import tutorial7.signal.Tools;
+import tutorial7.signal.Window;
 
 @SuppressWarnings("serial")
 public class FFTPanel extends JPanel implements MouseListener {
 
-	public static final boolean COMPLEX = true;
-	public static final boolean REAL = false;
-	
 	double[] data;
 	long centerFrequency = 0; // in kHz
 	int sampleRate = 0;
@@ -27,7 +25,9 @@ public class FFTPanel extends JPanel implements MouseListener {
 	int averageNum = 10;
 	int selectedBin;
 	boolean firstRun = true;
-	boolean complexOrReal = true;
+	boolean complex = true;
+	double[] blackmanWindow;
+	boolean windowData = false;
 	ComplexOscillator nco = null;
 	
 	public boolean realOnly = false;
@@ -35,14 +35,14 @@ public class FFTPanel extends JPanel implements MouseListener {
 	
 	String name;
 	
-	public FFTPanel(String name, int rate, long freq, int length, boolean complexOrReal) {
+	public FFTPanel(String name, int rate, long freq, int length, boolean complex) {
 		sampleRate = rate;
 		centerFrequency = freq;
 		fftLength = length;
 		this.name = name;
 		setFFTLength(length);
 		addMouseListener(this);
-		this.complexOrReal = complexOrReal;
+		this.complex = complex;
 	}
 
 	public void setNco(ComplexOscillator localOsc) {
@@ -70,11 +70,17 @@ public class FFTPanel extends JPanel implements MouseListener {
 		this.fftLength = len;
 		psdBuffer = new double[fftLength+1];
 		fft = new DoubleFFT_1D(fftLength);
-		binBandwidth = (double)sampleRate/(double)fftLength;
+		blackmanWindow = Window.initBlackmanWindow(fftLength-1);
+		binBandwidth = sampleRate/fftLength;
 	}
 	
 	public void setData(double[] buffer) {
-		if (complexOrReal == COMPLEX) {
+		if (complex) {
+			if (windowData)
+			for (int i=0; i< buffer.length/2; i++) {
+				buffer[2*i] = buffer[2*i] * blackmanWindow[i];
+				buffer[2*i+1] = buffer[2*i+1] * blackmanWindow[i];
+			}
 			fft.complexForward(buffer);
 		} else
 			fft.realForward(buffer);
@@ -86,6 +92,7 @@ public class FFTPanel extends JPanel implements MouseListener {
 				psd = buffer[2*k+1];
 			else
 				psd = Tools.psd(buffer[2*k],buffer[2*k+1], binBandwidth);
+			//double psd = Math.sqrt(buffer[2*k]*buffer[2*k]+buffer[2*k+1]*buffer[2*k+1]);
 			if (firstRun)
 				psdBuffer[k] = psd; // we do not have an average yet
 			else
@@ -126,8 +133,7 @@ public class FFTPanel extends JPanel implements MouseListener {
 		int selection = getSelectionFromBin(selectedBin);
 
 		int c = LineChart.getRatioPosition(0, fftLength, selection, graphWidth);
-		if (complexOrReal == COMPLEX)
-			gr.drawLine(c+BORDER, BORDER, c+BORDER, zeroPoint);
+		gr.drawLine(c+BORDER, BORDER, c+BORDER, zeroPoint);
 
 		int lastx = BORDER, lasty = zeroPoint;
 
@@ -140,7 +146,6 @@ public class FFTPanel extends JPanel implements MouseListener {
 		// Draw the FFT result, one half at a time
 		// First the negative frequencies, which we will draw on the left
 		if (data != null) {
-			if (complexOrReal == COMPLEX)
 			for (int n=fftLength/2; n< (fftLength); n+=step) {
 				int y = LineChart.getRatioPosition(minValue, maxValue, data[n], graphHeight);
 				int x = LineChart.getRatioPosition(fftLength/2, 0, n-fftLength/2, graphWidth/2);
@@ -152,14 +157,8 @@ public class FFTPanel extends JPanel implements MouseListener {
 			// Then the positive frequencies, which we draw on the right
 			for (int i=0; i< (fftLength/2); i+=step) {
 				int y = LineChart.getRatioPosition(minValue, maxValue, data[i], graphHeight);
-				int x = 0;
-				if (complexOrReal == COMPLEX) {
-					x = LineChart.getRatioPosition(fftLength/2, 0, i, graphWidth/2);
-					x = x + BORDER + graphWidth/2;
-				} else {
-					x = LineChart.getRatioPosition(fftLength/2, 0, i, graphWidth);
-					x = x + BORDER;
-				}
+				int x = LineChart.getRatioPosition(fftLength/2, 0, i, graphWidth/2);
+				x = x + BORDER + graphWidth/2;
 				gr.drawLine(lastx, lasty, x, y);
 				lastx = x;
 				lasty = y;
@@ -168,15 +167,8 @@ public class FFTPanel extends JPanel implements MouseListener {
 	}
 
 	private void drawHorizontalScale(Graphics gr, int graphWidth, int zeroPoint) {
-		int minFreqValue = 0;
-		int maxFreqValue = 0;
-		if (complexOrReal == COMPLEX) {
-			minFreqValue = (int) (getCenterFreqkHz()-sampleRate/2000);//96;
-			maxFreqValue = (int) (getCenterFreqkHz()+sampleRate/2000);//96;
-		} else {
-			minFreqValue = 0;
-			maxFreqValue = (int) (getCenterFreqkHz()+sampleRate/2000);//96;
-		}
+		int minFreqValue = (int) (getCenterFreqkHz()-sampleRate/2000);//96;
+		int maxFreqValue = (int) (getCenterFreqkHz()+sampleRate/2000);//96;
 		int labelWidth = 50; // allow 50 pixels per label
 		int numLabels = (graphWidth) / labelWidth; 
 		int increment = (maxFreqValue - minFreqValue) / numLabels;
@@ -213,13 +205,12 @@ public class FFTPanel extends JPanel implements MouseListener {
 	private long binToFrequency(int bin) {
 		long freq = 0;
 		if (bin < fftLength/2) {
-			freq = (long)(bin*binBandwidth);
+			freq = (long)(centerFrequency + bin*binBandwidth);
 		} else {
-			freq = (long)( -1* (fftLength-bin)*binBandwidth);
+			freq = (long)(centerFrequency - (fftLength-bin)*binBandwidth);
 		}
 		return freq;
 	}
-	
 	private int getSelectionFromBin(int bin) {
 		int selection;
 		if (bin < fftLength/2)
@@ -239,9 +230,9 @@ public class FFTPanel extends JPanel implements MouseListener {
 		else
 			selectedBin = selection + fftLength/2;
 		System.out.println(x+" is fft bin "+selectedBin);//these co-ords are relative to the component
-		System.out.println("Tuned to: " + (-1*binToFrequency(selectedBin)));
+		System.out.println("Tuned to: " + (-1*getSelectedFrequency()+centerFrequency));
 		if (nco != null)
-			nco.setFrequency(-1*binToFrequency(selectedBin)); // flip the sign as we move the spectrum in the opposite direction
+			nco.setFrequency(-1*getSelectedFrequency()+centerFrequency); // flip the sign as we move the spectrum in the opposite direction
 	}
 
 	@Override

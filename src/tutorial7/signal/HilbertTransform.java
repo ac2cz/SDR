@@ -1,4 +1,4 @@
-package tutorial6.signal;
+package tutorial7.signal;
 
 public class HilbertTransform {
 
@@ -32,8 +32,8 @@ public class HilbertTransform {
 		// flip
 		coeffs = new double[len];
 		for (int i=0; i < tempCoeffs.length; i++) {
-			coeffs[i] = tempCoeffs[tempCoeffs.length-i-1];
-			//System.out.println(coeffs[i]);
+			coeffs[i] = tempCoeffs[tempCoeffs.length-i-1]/gain;
+			System.out.println(coeffs[i]);
 		}
 
 	}
@@ -43,7 +43,7 @@ public class HilbertTransform {
 		int i;
 		for (i = 0; i < M; i++) 
 			xv[i] = xv[i+1];
-		xv[M] = in / gain;
+		xv[M] = in;
 		sum = 0.0;
 		for (i = 0; i <= M; i++) 
 			sum += (coeffs[i] * xv[i]);

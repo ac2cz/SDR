@@ -4,7 +4,7 @@ import tutorial1.signal.Oscillator;
 
 public class SdrTutorial1 {
 
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) {
 
 		Oscillator osc = new Oscillator(48000, 1200);
 		

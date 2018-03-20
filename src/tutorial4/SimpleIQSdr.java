@@ -28,8 +28,11 @@ public class SimpleIQSdr {
 		while (readingData) {
 			double[] buffer = soundCard.read();
 			if (buffer != null) {
-				for (int d=0; d < audio.length; d++) {
+				for (int d=0; d < buffer.length/2; d++) {
+					//audio[d] = buffer[2*d];
 					audio[d] = lowPass.filter(buffer[2*d]);
+					buffer[2*d] = audio[d];
+					buffer[2*d+1] = 0;
 				}
 				sink.write(audio);	
 				window.setData(buffer);

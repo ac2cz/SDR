@@ -27,7 +27,7 @@ public class OscTest2 {
 		JFrame frame = new JFrame();
 		frame.setTitle("Complex Oscillator Test");
 		frame.setBounds(100,100,700,400);
-		FFTPanel plot = new FFTPanel(sampleRate, 0, len, true);
+		FFTPanel plot = new FFTPanel(sampleRate, 0, len);
 		frame.add(plot);
 		
 		for (int n=0; n< len; n++) {
