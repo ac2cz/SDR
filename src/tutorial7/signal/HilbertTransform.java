@@ -33,7 +33,7 @@ public class HilbertTransform {
 		coeffs = new double[len];
 		for (int i=0; i < tempCoeffs.length; i++) {
 			coeffs[i] = tempCoeffs[tempCoeffs.length-i-1]/gain;
-			System.out.println(coeffs[i]);
+			//System.out.println(coeffs[i]);
 		}
 
 	}
