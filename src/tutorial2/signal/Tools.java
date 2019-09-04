@@ -25,6 +25,7 @@ public class Tools {
 		for (int i = 0; i < out.length; i++) {// 4 bytes for each sample. 2 in each stereo channel.
 			byte[] ab = {readBuffer[4*i],readBuffer[4*i+1]};
 			double value =  littleEndian2(ab,16);
+			System.out.println(value);
 			value = value /32768.0;
 			out[i] = value;
 		}	
@@ -39,4 +40,12 @@ public class Tools {
 	public static double psd(double re, double im, double binBandwidth) {
 		return (20*Math.log10(Math.sqrt((re*re) + (im*im))/binBandwidth));
 	}	
+	
+	public static void main(String[] args) {
+		double[] a = {0,0};
+        byte[] data = {10,10,20,20,10,(byte) 0x88,20,20};
+        Tools.getDoublesFromBytes(a, data);
+        System.out.println(a[0]);
+        System.out.println(a[1]);
+	}
 }
