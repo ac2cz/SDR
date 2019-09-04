@@ -39,6 +39,7 @@ public class LineChart extends JPanel {
 		gr.drawLine(BORDER, zeroPoint, getWidth()-BORDER, zeroPoint);
 
 		int step = data.length / 16; // plot 16 labels
+		if (step == 0) step = 1;
 		int lastx = BORDER, lasty = zeroPoint;
 
 		for (int n=0; n < data.length; n++) {
