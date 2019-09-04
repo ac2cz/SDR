@@ -5,8 +5,8 @@ import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import tutorial6.plot.FFTPanel;
-import tutorial6.signal.ComplexOscillator;
+import tutorial7.plot.FFTPanel;
+import tutorial7.signal.ComplexOscillator;
 
 
 @SuppressWarnings("serial")
