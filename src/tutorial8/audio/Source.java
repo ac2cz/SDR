@@ -1,7 +1,5 @@
 package tutorial8.audio;
 
-import java.io.IOException;
-
 import tutorial8.signal.Tools;
 
 public abstract class Source implements Runnable {
@@ -24,30 +22,24 @@ public abstract class Source implements Runnable {
 		}
 	}
 	
-	public int read(double[] readBuffer) {
-		//int bytesRead = 0; 
+	public int read(double[] readBuffer) { 
 		int doublesRead = 0;
 
 		// We block until we have read readBuffer length bytes, assuming we are still running
 		while (running && doublesRead < readBuffer.length) { // 2 bytes for each sample
 			if (buffer.size() > 2) {// if we have at least one set of bytes, then read them
-				try {
-					
+				try {	
 					readBuffer[doublesRead] = buffer.read();
 					doublesRead+=1;
 				} catch (IndexOutOfBoundsException e) {
 					// If this happens, we are in an unusual situation.  We waited until the circularBuffer contains readBuffer.length of data
 					// then we started to read it one byte at a time.  However, we have moved the read (start) pointer as far as the end
 					// pointer, so we have run out of data.
-					
 					e.printStackTrace();
 				}
 			} else {
 				try {
-					Thread.sleep(0, 1);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+					Thread.sleep(0, 1); } catch (InterruptedException e) { e.printStackTrace(); }
 			}
 		}
 		return doublesRead;
