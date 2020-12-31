@@ -24,7 +24,7 @@ public class SimpleIQSdr {
 		MainWindow window = new MainWindow("SimpleIQ SDR", sampleRate, FFT_LENGTH);
 		AudioSink sink = new AudioSink(sampleRate/4);
 		ComplexOscillator localOsc = new ComplexOscillator(sampleRate, 0);//20103
-		ComplexOscillator bfo = new ComplexOscillator(48000, 600);
+//		ComplexOscillator bfo = new ComplexOscillator(48000, 600);
 		window.setNco(localOsc);
 		FirFilter lowPassI = new FirFilter();
 		FirFilter lowPassQ = new FirFilter();

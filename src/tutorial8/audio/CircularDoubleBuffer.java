@@ -54,4 +54,41 @@ public class CircularDoubleBuffer {
 		readPointer = p;
 		return d;
 	}
+	
+	/**
+	 * This returns the capacity we have to save more data.  It is the distance from the write pointer
+	 * to the read pointer.
+	 * @return
+	 */
+	public int getCapacity() { // how many bytes can we add without the end pointer reaching the start pointer
+		if (readPointer == 0 && writePointer == 0) {
+			return doubles.length;  // Special case when we have not added any data at all
+		}
+		int size = 0;
+		if (writePointer > readPointer)  // Then we have the distance to the end of the array plus the start pointer
+			size = doubles.length - writePointer + readPointer;
+		else {  // endPointer < StartPointer 
+			// we only have the distance from the end pointer to the start pointer
+			size = readPointer - writePointer;
+		}
+		return size;	
+		
+	}
+	
+	/**
+	 * This returns the size of the virtual array.  This tells us how much data we have available to read or how much data
+	 * is stored
+	 * @return
+	 */
+	public int size() {
+		int size = 0;
+		int e = writePointer; // snapshot the end pointer to avoid a race condition in the checks below.  The size can only grow if the end pointer moves, so this is safe
+		if (e >= readPointer)
+			size = e - readPointer;
+		else {
+			size = doubles.length - readPointer; // distance from start to end of the real array
+			size = size + e;  //  add the distance from the start to the write pointer
+		}
+		return size;	
+	}
 }

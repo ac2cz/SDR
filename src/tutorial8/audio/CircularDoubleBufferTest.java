@@ -42,6 +42,63 @@ class CircularDoubleBufferTest {
 	}
 	
 	@Test
+	void testGetCapacity() {
+		CircularDoubleBuffer buffer = new CircularDoubleBuffer(5);
+		buffer.add(1.0);
+		int c = buffer.getCapacity();
+		assertEquals(4, c);
+
+		buffer.add(2.0);
+		c = buffer.getCapacity();
+		assertEquals(3, c);
+
+		buffer.add(3.0);
+		c = buffer.getCapacity();
+		assertEquals(2, c);
+
+		double d = buffer.read();
+		System.out.println(d);
+		assertEquals(1.0, d);
+		
+		c = buffer.getCapacity();
+		assertEquals(3, c);
+	}
+	
+	@Test
+	void testSize() {
+		CircularDoubleBuffer buffer = new CircularDoubleBuffer(5);
+		int s = buffer.size();
+		int c = buffer.getCapacity();
+		assertEquals(0, s);
+		assertEquals(5-c, s);
+		
+		buffer.add(1.0);
+		s = buffer.size();
+		assertEquals(1, s);
+		c = buffer.getCapacity();
+		assertEquals(5-c, s);
+		
+		buffer.add(2.0);
+		s = buffer.size();
+		assertEquals(2, s);
+		c = buffer.getCapacity();
+		assertEquals(5-c, s);
+		
+		buffer.add(3.0);
+		s = buffer.size();
+		assertEquals(3, s);
+		c = buffer.getCapacity();
+		assertEquals(5-c, s);
+		
+		double d = buffer.read();
+		s = buffer.size();
+		assertEquals(2, s);
+		c = buffer.getCapacity();
+		assertEquals(5-c, s);
+		
+	}
+	
+	@Test
 	void testReadFail() {
 		CircularDoubleBuffer buffer = new CircularDoubleBuffer(5);
 		buffer.add(1.0);

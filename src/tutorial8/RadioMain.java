@@ -11,10 +11,10 @@ public class RadioMain {
 
 	public static void main(String[] args) {
 		int sampleRate = 192000;
-		int sampleLength = 4096;
+		int sampleLength = 4096; 
 		
 		Sdr sdr = new Sdr(sampleRate, sampleLength);
-		MainWindow window = new MainWindow("SDR", sdr);
+		MainWindow window = new MainWindow("SDR with Circular Buffer", sdr);
 
 		try {
 			sdr.processing();
