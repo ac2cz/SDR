@@ -61,18 +61,7 @@ public class CircularDoubleBuffer {
 	 * @return
 	 */
 	public int getCapacity() { // how many bytes can we add without the end pointer reaching the start pointer
-		if (readPointer == 0 && writePointer == 0) {
-			return doubles.length;  // Special case when we have not added any data at all
-		}
-		int size = 0;
-		if (writePointer > readPointer)  // Then we have the distance to the end of the array plus the start pointer
-			size = doubles.length - writePointer + readPointer;
-		else {  // endPointer < StartPointer 
-			// we only have the distance from the end pointer to the start pointer
-			size = readPointer - writePointer;
-		}
-		return size;	
-		
+		return doubles.length-size();	
 	}
 	
 	/**
@@ -82,7 +71,7 @@ public class CircularDoubleBuffer {
 	 */
 	public int size() {
 		int size = 0;
-		int e = writePointer; // snapshot the end pointer to avoid a race condition in the checks below.  The size can only grow if the end pointer moves, so this is safe
+		int e = writePointer; // snapshot the end pointer to avoid a race condition in the checks below.  The size can only grow if the write pointer moves, so this is safe
 		if (e >= readPointer)
 			size = e - readPointer;
 		else {
