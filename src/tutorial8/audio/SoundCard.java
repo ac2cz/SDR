@@ -7,7 +7,6 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 
 public class SoundCard extends Source {
-
 	AudioFormat audioFormat;
 	TargetDataLine targetDataLine; 
 	byte[] readBuffer;
@@ -80,12 +79,10 @@ public class SoundCard extends Source {
 			} catch (IndexOutOfBoundsException e) {
 				System.err.println("No fill, buffer full");
 				Thread.yield();
-//				try {Thread.sleep(1);} catch (InterruptedException e1) { e1.printStackTrace();}
 			} catch (LineUnavailableException e) {
 				running = false;
 				e.printStackTrace();
 			}
 		}
-		
 	}
 }
