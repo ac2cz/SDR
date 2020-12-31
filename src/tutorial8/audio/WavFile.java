@@ -7,19 +7,16 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import tutorial8.signal.Tools;
 
-public class WavFile {
-
+public class WavFile extends Source {
 	AudioInputStream audioStream = null; // The stream of data from the wave file
 	byte[] readBuffer;
-	double[] out;
 	boolean stereo = false;
+		
+	public static final int READ_BUFFER_SIZE = 256;
 
-	public WavFile(String fileName, int samples, boolean stereo) throws UnsupportedAudioFileException, IOException {
-		readBuffer = new byte[samples * 4];
-		if (stereo)
-			out = new double[samples * 2]; 
-		else 
-			out = new double[samples];
+	public WavFile(String fileName, int bufferSize, boolean stereo) throws UnsupportedAudioFileException, IOException {
+		super(bufferSize);
+		readBuffer = new byte[READ_BUFFER_SIZE * 4];
 		
 		File soundFile = new File(fileName);
 		this.stereo = stereo;
@@ -28,28 +25,39 @@ public class WavFile {
 		System.out.println("Format: " + audioStream.getFormat());
 	}
 	
-	public double[] read() throws IOException {
-		if (audioStream == null) 
-			return null; 
-		else if (!(audioStream.available() > 0)) 
-			return null;
+	public void fillBuffer() throws IOException {
+		if (!(audioStream.available() > 0)) throw new IndexOutOfBoundsException();
+		if (buffer.getCapacity() <= readBuffer.length) throw new IndexOutOfBoundsException();
 		audioStream.read(readBuffer, 0, readBuffer.length);
-		for (int i = 0; i < out.length; i++) {// 4 bytes for each sample. 2 in each stereo channel.
-			int step = 4;
-			if (stereo) step = 2;
-			byte[] ab = {readBuffer[step*i],readBuffer[step*i+1]};
-			double value =  Tools.littleEndian2(ab,16);
-			value = value /32768.0;
-			out[i] = value;
-		}
-		return out;
+		super.fillBuffer(readBuffer, stereo);
 	}
 
 	public void close() {
+		stop();
 		try {
 			audioStream.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+
+	public void run() {
+		if (audioStream == null) {
+			return; 
+		} 
+		while (running) {
+			try {
+				fillBuffer();
+			} catch (IndexOutOfBoundsException e) {
+				// wait for some data to be available
+				try {Thread.sleep(1);} catch (InterruptedException e1) { e1.printStackTrace();}
+			} catch (IOException e) {
+				running = false;
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
+
 }
