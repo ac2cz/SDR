@@ -47,7 +47,7 @@ public class UsbDevice {
 			e.printStackTrace();
 		}
 		try {
-			Thread.sleep(1000); // wait for the library to be ready to exit or we get a crash
+			Thread.sleep(300); // wait for the library to be ready to exit or we get a crash
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
