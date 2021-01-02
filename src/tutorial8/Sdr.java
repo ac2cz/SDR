@@ -30,7 +30,7 @@ public class Sdr {
 		FM
 	}
 	
-	Mode mode = Mode.USB;
+	Mode mode = Mode.LSB;
 	
 	public Sdr(int sampleRate, int sampleLength) {
 		this.sampleRate = sampleRate;
@@ -43,8 +43,8 @@ public class Sdr {
 	
 	public void processing() throws UnsupportedAudioFileException, IOException, LineUnavailableException {
 		int sampleRate = 192000;
-//		Source soundCard = new WavFile("ecars_net_7255_HDSDR_20180225_174354Z_7255kHz_RF.wav", sampleRate*2, true);
-		Source soundCard = new SoundCard(sampleRate, sampleRate, true);
+		Source soundCard = new WavFile("ecars_net_7255_HDSDR_20180225_174354Z_7255kHz_RF.wav", sampleRate*2, true);
+//		Source soundCard = new SoundCard(sampleRate, sampleRate*2, true);
 		AudioSink sink = new AudioSink(sampleRate/4);
 		
 		FirFilter lowPassI = new FirFilter();
