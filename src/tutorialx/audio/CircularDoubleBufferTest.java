@@ -119,12 +119,12 @@ class CircularDoubleBufferTest {
 		try {
 			d = buffer.read();
 			fail("Failed to detect read issue"); // should never get here.  If we do we fail.
-			
+
 		} catch (IndexOutOfBoundsException e) {
 			System.out.println("Read Failed, as expected");
 		}
 	}
-	
+
 	@Test
 	void testWriteFail() {
 		CircularDoubleBuffer buffer = new CircularDoubleBuffer(5);
@@ -160,48 +160,50 @@ class CircularDoubleBufferTest {
 
 	@Test
 	void testThreads() throws InterruptedException {
-		CircularDoubleBuffer buffer = new CircularDoubleBuffer(5);
+		CircularDoubleBuffer buffer = new CircularDoubleBuffer(50);
 		Random r = new Random();
-//		double[] data = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 };
-		double[] data = new double[100]; 
+		//		double[] data = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 };
+		double[] data = new double[1000]; 
 		for (int i=0; i<100; i++) {
 			data[i] = r.nextDouble();
 		}
-		
+
 		// Now make a thread that writes the data into the buffer and another thread that reads from it
 		Thread writeThread = new Thread() {
-			  public void run() {
-				  for (int i=0; i<data.length; i++) {
-						buffer.add(data[i]);
-						System.out.println("WROTE:"+i+ ": " + data[i]);
-						try { Thread.sleep(10); } catch (InterruptedException e) { System.err.println("stopped");}
-						
-					}
-			  }
-			 };
-		
+			public void run() {
+				for (int i=0; i<data.length; i++) {
+
+					buffer.add(data[i]);
+					//System.out.println("WROTE:"+i+ ": " + data[i]);
+					try { Thread.sleep(10); } catch (InterruptedException e) { System.err.println("stopped");}
+
+				}
+			}
+		};
+
 		Thread readThread = new Thread() {
-			  public void run() {
-				  int i = 0;
-				  while (i < data.length) {
-					  try {
+			public void run() {
+				int i = 0;
+				while (i < data.length) {
+					try {
 						double d = buffer.read();
-						System.out.println("READ:"+i+ ": " + d);
+						//System.out.println("READ:"+i+ ": " + d);
 						assertEquals(data[i], d);
 						i++;
-					  } catch (IndexOutOfBoundsException e) {
-						  // wait for data to be available.  
-						  try { Thread.sleep(1); } catch (InterruptedException e1) { }
-					  }
+					} catch (IndexOutOfBoundsException e) {
+						// wait for data to be available.  
+						int s = r.nextInt(100);
+						try { Thread.sleep(s); } catch (InterruptedException e1) { }
 					}
-			  }
-			 };
-		
+				}
+			}
+		};
+
 		writeThread.start();
 		readThread.start();
 		writeThread.join();
 	}
-	
-	
+
+
 	
 }

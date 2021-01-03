@@ -12,7 +12,7 @@ import tutorialx.gui.MainWindow;
 public class RadioMain {
 
 	public static void main(String[] args) throws DeviceException {
-		int sampleRate = 240000;
+		int sampleRate = 960000;
 		int R = sampleRate / 48000;
 		int sampleLength = 1024*R; 
 		

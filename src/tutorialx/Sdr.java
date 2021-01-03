@@ -23,6 +23,7 @@ import tutorialx.signal.FirFilter;
 import tutorialx.signal.HilbertTransform;
 
 public class Sdr {
+	public static final int AF_SAMPLE_RATE = 48000;
 	public int sampleRate = 0;
 	public double[] IQbuffer;
 	public double[] IFbuffer;
@@ -41,8 +42,8 @@ public class Sdr {
 	}
 	Mode mode = Mode.FM;
 	FmDemodulator fm = new FmDemodulator();
-	double gain = 0.5; //////////////////// .5 for FM 10 for SSB
-	boolean ppFilter = false;
+	double gain = 0.05; // .05 for FM 10 for SSB
+	boolean ppFilter = true;
 	HilbertTransform ht;
 	Delay delay;
 	FirFilter audioLowPass;
@@ -51,33 +52,33 @@ public class Sdr {
 		this.sampleRate = sampleRate;
 		this.sampleLength = sampleLength;
 		this.centerFrequency = centerFrequency;
-		R = sampleRate / 48000;
+		R = sampleRate / AF_SAMPLE_RATE;
 		System.out.println("Decimation by: " + R);
 		IQbuffer = new double[sampleLength*2];
 		audioBuffer = new double[sampleLength/R]; // just one mono channel, decimated by R
 		IFbuffer = new double[sampleLength*2];
 		localOsc = new ComplexOscillator(sampleRate, 0);
-		ht = new HilbertTransform(48000, 255);
+		ht = new HilbertTransform(AF_SAMPLE_RATE, 255);
 		delay = new Delay((255-1)/2);
 		audioLowPass = new FirFilter();
 	}
 
 	public void processing() throws UnsupportedAudioFileException, IOException, LineUnavailableException, DeviceException {
 	//			Source soundCard = new WavFile("ecars_net_7255_HDSDR_20180225_174354Z_7255kHz_RF.wav", sampleRate*2, true);
-		usb = new UsbDevice((short)0x0bda,(short)0x2838);
+		usb = new UsbDevice((short)0x0bda,(short)0x2838, sampleRate);
 		usb.setTunedFrequency(centerFrequency);
-		Source soundCard = new RtlSource(sampleRate*5);
-		usb.addListener((RtlSource)soundCard);
+		Source soundCard = new RtlSource(sampleRate*5); // give the buffer plenty of space
+		usb.addListener((RtlSource)soundCard); // we need to cast soundCard to RtlSource because that is a Listner.  Source is not.
 		
 	//	Source soundCard = new SoundCard(sampleRate, sampleRate*2, true);
-		AudioSink sink = new AudioSink(sampleRate/R);
+		AudioSink sink = new AudioSink(AF_SAMPLE_RATE);
 
 //		FirFilter lowPassI = new FirFilter();
 //		FirFilter lowPassQ = new FirFilter();
-		FirFilter lowPassI = new FirFilter(Filter.makeRaiseCosine(sampleRate, 5000, 0.5, 256));
-		FirFilter lowPassQ = new FirFilter(Filter.makeRaiseCosine(sampleRate, 5000, 0.5, 256));
-		PolyPhaseFilter polyPhaseFilterI = new PolyPhaseFilter(sampleRate, 5000, R, R*48);
-		PolyPhaseFilter polyPhaseFilterQ = new PolyPhaseFilter(sampleRate, 5000, R, R*48);
+		FirFilter lowPassI = new FirFilter(Filter.makeRaiseCosine(sampleRate, 12000, 0.5, 256));
+		FirFilter lowPassQ = new FirFilter(Filter.makeRaiseCosine(sampleRate, 12000, 0.5, 256));
+		PolyPhaseFilter polyPhaseFilterI = new PolyPhaseFilter(sampleRate, 12000, R, R*10);
+		PolyPhaseFilter polyPhaseFilterQ = new PolyPhaseFilter(sampleRate, 12000, R, R*10);
 
 		boolean readingData = true;
 		int decimateCount=1;
@@ -99,9 +100,8 @@ public class Sdr {
 					IFbuffer[2*d] = IQbuffer[2*d]*c.geti() + IQbuffer[2*d+1]*c.getq();
 					IFbuffer[2*d+1] = IQbuffer[2*d+1]*c.geti() - IQbuffer[2*d]*c.getq();
 
-					//Filter pre decimation
 					if (!ppFilter) {
-	
+						//Filter pre decimation
 						audioI = lowPassI.filter(IFbuffer[2*d]);
 						audioQ = lowPassQ.filter(IFbuffer[2*d+1]);
 
